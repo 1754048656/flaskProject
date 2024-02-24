@@ -1,3 +1,5 @@
+import threading
+
 from flask import Flask, jsonify, request
 from common.mysql_operate import db
 from common.redis_operate import redis_db
@@ -14,7 +16,8 @@ def hello_world():
 
 userOnlineList = []
 @app.route("/p", methods=["POST"])
-def userPhoneInfo():
+def user_phone_info():
+    """提交手机信息"""
     phoneInfo = request.json.get("p", "").strip()
     print(phoneInfo)
     exTime = 5*60
@@ -26,9 +29,72 @@ def userPhoneInfo():
     userItem['count'] = count
     print(count)
 
-
     return jsonify({"code": 0, "data": userItem, "msg": "查询成功"})
 
+@app.route("/onlineList", methods=["GET"])
+def get_online_users():
+    """获取所有在线手机信息"""
+    data = userOnlineList
+    return jsonify({"code": num, "data": data, "msg": "查询成功"})
+
+def sleep_loop(num_loops): # 定时器暂停
+    global timer_started
+
+    for _ in range(num_loops):
+        time.sleep(1)
+        if timer_cancelled:
+            timer_started = False
+            return False
+
+# --------------------------------------------------------
+
+timer_thread = None  # 定时任务线程
+timer_started = False  # 定时任务是否已经启动标记
+timer_cancelled = False  # 定时任务是否被取消标记
+
+num = 0
+def run_task():  # 定时任务执行的方法
+    global num
+    num += 1
+    pass
+
+def timed_task(): # 定时器
+    global timer_cancelled
+
+    while not timer_cancelled:
+        print("定时任务执行")
+        # 执行其他任务...
+        run_task()
+        sleep_loop(5)
+
+    print("定时任务已取消")
+
+@app.route('/cancel_timer') # 取消定时器
+def cancel_timer():
+    global timer_cancelled, timer_started
+
+    if not timer_started:
+        return jsonify(message="定时任务未启动")
+
+    timer_cancelled = True
+    return jsonify(message="定时任务已取消")
+
+@app.route('/start_timer') # 启动定时器
+def start_timer():
+    global timer_thread, timer_started, timer_cancelled
+    timer_cancelled = False
+    if timer_started:
+        return jsonify(message="定时任务已经启动")
+
+    # 创建一个新的线程，并在该线程中执行定时任务
+    timer_thread = threading.Thread(target=timed_task)
+    timer_thread.start()
+
+    timer_started = True
+    return jsonify(message="定时任务已启动")
+
+start_timer()  # 在启动Flask服务之前启动定时器
+# --------------------------------------------------------
 
 @app.route("/users", methods=["GET"])
 def get_all_users():
