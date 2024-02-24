@@ -12,6 +12,10 @@ app.config["JSON_AS_ASCII"] = False  # jsonify返回的中文正常显示
 def hello_world():
     return 'Hello World!'
 
+@app.route("/p", methods=["POST"])
+def userPhoneInfo():
+    return 'Hello World!'
+
 
 @app.route("/users", methods=["GET"])
 def get_all_users():
