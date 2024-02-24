@@ -20,10 +20,14 @@ def userPhoneInfo():
     exTime = 5*60
     userItem = {}
     userItem[phoneInfo] = exTime
+
     userOnlineList.append(userItem)
     count = len(userOnlineList)
+    userItem['count'] = count
     print(count)
-    return phoneInfo
+
+
+    return jsonify({"code": 0, "data": userItem, "msg": "查询成功"})
 
 
 @app.route("/users", methods=["GET"])
