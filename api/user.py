@@ -93,7 +93,8 @@ def start_timer():
     timer_started = True
     return jsonify(message="定时任务已启动")
 
-start_timer()  # 在启动Flask服务之前启动定时器
+with app.app_context():
+    start_timer()  # 在启动Flask服务之前启动定时器
 # --------------------------------------------------------
 
 @app.route("/users", methods=["GET"])
